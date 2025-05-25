@@ -1,86 +1,121 @@
-name: CI/CD Workflow
+name: Manual Docker Image Build and Push (Node / Node+Java)
 
 on:
-  push:
-    branches:
-    - master
-    paths:
-    - 'image-tag'
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Debian base tag (e.g. bullseye, bookworm)"
+        required: true
+        default: "bullseye"
+        type: string
+      include_java:
+        description: "Include Java + Maven in the image?"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      nvm_version:
+        description: "NVM version to install"
+        required: false
+        default: "0.39.7"
+        type: string
+      node_version:
+        description: "Node.js version to install"
+        required: true
+        default: "22.1.0"
+        type: string
+      yarn_version:
+        description: "Yarn version to install"
+        required: false
+        default: "1.22.22"
+        type: string
+      docker_gid:
+        description: "GID of the 'docker' group on the host (used to access docker.sock)"
+        required: false
+        default: "1001"
+        type: string
+      java_version:
+        description: "Java (OpenJDK) version to install (if Java enabled)"
+        required: false
+        default: "17"
+        type: string
+      maven_version:
+        description: "Maven version to install (if Java enabled)"
+        required: false
+        default: "3.9.6"
+        type: string
+      use_cache:
+        description: "Use Docker cache?"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      update_latest:
+        description: "Also tag and push as 'latest'?"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
 
 jobs:
-  test:
-    name: Build and push image to dockerhub
+  build_and_push:
+    name: Build and Push Docker Image
+    if: github.actor == 'lgdevlop'
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout master
-        uses: actions/checkout@v2
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
-      
-      # - name: Cache Docker layers
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: /tmp/.buildx-cache
-      #     key: ${{ runner.os }}-buildx-${{ github.sha }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-buildx-
+      - name: 🧠 Select Dockerfile template
+        id: choose_template
+        run: |
+          if [[ "${{ inputs.include_java }}" == "true" ]]; then
+            echo "TEMPLATE=Dockerfile.debian.node-java.template" >> $GITHUB_ENV
+          else
+            echo "TEMPLATE=Dockerfile.debian.node.template" >> $GITHUB_ENV
+          fi
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: 🛠️ Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 💾 Restore Docker cache (if enabled)
+        if: inputs.use_cache == 'true'
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: 🔐 Login to DockerHub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set environment variable
-        run: |
-          echo "image_tag=$(cat image-tag)" >> $GITHUB_ENV
-
-      # - name: Show environment variable
-      #   run: |
-      #     echo "Image tag: ${{ env.image_tag }}"
-
-      - name: Set node image on Dockerfile
-        run: |
-            sed 's|my-docker-tag|node:'"${{ env.image_tag }}"'|g' Dockerfile > dockerfile.image
-
-      # - name: Test image build
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     no-cache: true
-      #     context: ./
-      #     file: ./dockerfile.image
-      #     push: false
-      #     tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-dev/${{ env.image_tag }}
-
-      - name: Push image to dockerhub
-        id: docker_build
-        uses: docker/build-push-action@v2
+      - name: 🏗️ Build and Push Docker image
+        uses: docker/build-push-action@v5
         with:
-          context: ./
-          file: ./dockerfile.image
+          context: .
+          file: ${{ env.TEMPLATE }}
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-dev:${{ env.image_tag }}
-
-  # deploy:
-  #   name: Push image to dockerhub
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Set environment variable
-  #       run: |
-  #         echo "image_tag=$(cat image-tag)" >> $GITHUB_ENV
-
-  #     - name: Show Dockerfile
-  #       run: |
-  #         cat dockerfile.image
-
-  #     # - name: Build and push
-  #     #   id: docker_build
-  #     #   uses: docker/build-push-action@v2
-  #     #   with:
-  #     #     context: ./
-  #     #     file: ./dockerfile.image
-  #     #     push: true
-  #     #     tags: lgdevlop/node-dev/${{ env.image_tag }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/node-dev:${{ inputs.node_version }}-${{ inputs.image_tag }}
+            ${{ inputs.update_latest == 'true' && format('{0}/node-dev:latest', secrets.DOCKERHUB_USERNAME) || '' }}
+          build-args: |
+            IMAGE_TAG=${{ inputs.image_tag }}
+            NVM_VERSION=${{ inputs.nvm_version }}
+            NODE_VERSION=${{ inputs.node_version }}
+            YARN_VERSION=${{ inputs.yarn_version }}
+            JAVA_VERSION=${{ inputs.java_version }}
+            MAVEN_VERSION=${{ inputs.maven_version }}
+            DOCKER_GID=${{ inputs.docker_gid }}
+          cache-from: ${{ inputs.use_cache == 'true' && 'type=gha' || '' }}
+          cache-to: ${{ inputs.use_cache == 'true' && 'type=gha,mode=max' || '' }}
