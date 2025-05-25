@@ -4,11 +4,28 @@
 #
 #######################################################################################################################
 
+# Path to your zsh installation.
+export ZSH="$HOME/.zsh"
+
 # Path for executables
 export PATH="$PATH:$HOME/bin"
 export PATH="$PATH:/usr/local/bin"
 
 # Path for NodeJs executables
 export PATH="$PATH:$HOME/.yarn/bin/"
+
+# Path for others executables
+export PATH="$PATH:$HOME/.local/bin"
+
+# Java setup
+# export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+# export PATH=$JAVA_HOME/bin:$PATH
+
+# Maven setup
+export MAVEN_HOME="$HOME/.maven/default"
+export PATH="$MAVEN_HOME/bin:$PATH"
+
+# Add fzf to PATH
+export PATH="$HOME/.fzf/bin:$PATH"
 
 #######################################################################################################################
