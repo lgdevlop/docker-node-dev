@@ -18,8 +18,7 @@ export PATH="$PATH:$HOME/.yarn/bin/"
 export PATH="$PATH:$HOME/.local/bin"
 
 # Java setup
-# export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
-# export PATH=$JAVA_HOME/bin:$PATH
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
 
 # Maven setup
 export MAVEN_HOME="$HOME/.maven/default"

@@ -1,0 +1,39 @@
+{
+  "name": "DevContainer Node + Java",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      "IMAGE_TAG": "bullseye",
+      "NVM_VERSION": "0.39.7",
+      "NODE_VERSION": "22.1.0",
+      "YARN_VERSION": "1.22.22",
+      "JAVA_VERSION": "17",
+      "MAVEN_VERSION": "3.9.6",
+      "DOCKER_GID": "1001"
+    }
+  },
+  "remoteUser": "node",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "vscjava.vscode-java-pack",
+        "redhat.java",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "source=${env:SSH_AUTH_SOCK},target=/ssh-agent,type=bind",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/ssh-agent"
+  }
+}
