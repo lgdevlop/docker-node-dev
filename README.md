@@ -23,6 +23,7 @@ examples/.devcontainer/
 * 🌧️ Based on Debian (e.g., `bullseye`)
 * 🧑‍💻 User `node` (UID 1000) with proper Docker group access
 * 🧹 Includes:
+
   * Node.js + Yarn (via NVM)
   * Optional: OpenJDK (Java 17) and Maven (3.9.6)
   * Oh My Zsh + Powerlevel10k theme
@@ -51,6 +52,10 @@ You can trigger the workflow manually from the GitHub Actions tab using the foll
 | `use_cache`     | Enable Docker layer cache         | `true` / `false` |
 
 > 🔐 Note: Only the repository owner (`lgdevlop`) is authorized to trigger the build.
+
+**🧰 Docker Hub**
+Published images are available at:
+👉 [`https://hub.docker.com/r/lgdevlop/node-dev`](https://hub.docker.com/r/lgdevlop/node-dev)
 
 ## 💡 Usage
 
