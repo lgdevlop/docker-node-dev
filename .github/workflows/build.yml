@@ -19,12 +19,12 @@ on:
       nvm_version:
         description: "NVM version to install"
         required: false
-        default: "0.39.7"
+        default: "0.40.3"
         type: string
       node_version:
         description: "Node.js version to install"
         required: true
-        default: "22.1.0"
+        default: "22.16.0"
         type: string
       yarn_version:
         description: "Yarn version to install"
@@ -44,7 +44,7 @@ on:
       maven_version:
         description: "Maven version to install (if Java enabled)"
         required: false
-        default: "3.9.6"
+        default: "3.9.9"
         type: string
       use_cache:
         description: "Use Docker cache?"
@@ -78,15 +78,9 @@ jobs:
         run: |
           if [[ "${{ inputs.include_java }}" == "true" ]]; then
             echo "TEMPLATE=Dockerfile.debian.node-java.template" >> $GITHUB_ENV
-          else
-            echo "TEMPLATE=Dockerfile.debian.node.template" >> $GITHUB_ENV
-          fi
-
-      - name: 🎮 Define image variant suffix
-        run: |
-          if [[ "${{ inputs.include_java }}" == "true" ]]; then
             echo "VARIANT_SUFFIX=-java" >> $GITHUB_ENV
           else
+            echo "TEMPLATE=Dockerfile.debian.node.template" >> $GITHUB_ENV
             echo "VARIANT_SUFFIX=" >> $GITHUB_ENV
           fi
 
@@ -125,5 +119,5 @@ jobs:
             JAVA_VERSION=${{ inputs.java_version }}
             MAVEN_VERSION=${{ inputs.maven_version }}
             DOCKER_GID=${{ inputs.docker_gid }}
-          cache-from: ${{ inputs.use_cache == 'true' && 'type=gha' || '' }}
-          cache-to: ${{ inputs.use_cache == 'true' && 'type=gha,mode=max' || '' }}
+          cache-from: ${{ inputs.use_cache == 'true' && format('type=gha,scope=node-{0}', inputs.node_version) || '' }}
+          cache-to: ${{ inputs.use_cache == 'true' && format('type=gha,mode=max,scope=node-{0}', inputs.node_version) || '' }}
