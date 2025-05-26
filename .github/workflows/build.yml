@@ -82,6 +82,14 @@ jobs:
             echo "TEMPLATE=Dockerfile.debian.node.template" >> $GITHUB_ENV
           fi
 
+      - name: 🎮 Define image variant suffix
+        run: |
+          if [[ "${{ inputs.include_java }}" == "true" ]]; then
+            echo "VARIANT_SUFFIX=-java" >> $GITHUB_ENV
+          else
+            echo "VARIANT_SUFFIX=" >> $GITHUB_ENV
+          fi
+
       - name: 🛠️ Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -107,7 +115,7 @@ jobs:
           file: ${{ env.TEMPLATE }}
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/node-dev:${{ inputs.node_version }}-${{ inputs.image_tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/node-dev:${{ inputs.node_version }}-${{ inputs.image_tag }}${{ env.VARIANT_SUFFIX }}
             ${{ inputs.update_latest == 'true' && format('{0}/node-dev:latest', secrets.DOCKERHUB_USERNAME) || '' }}
           build-args: |
             IMAGE_TAG=${{ inputs.image_tag }}
