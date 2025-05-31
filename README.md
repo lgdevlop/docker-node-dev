@@ -79,6 +79,7 @@ Full documentation is located in [`project-docs/`](./project-docs/):
 * [`plugins/zsh-histdb.md`](./project-docs/plugins/zsh-histdb.md)
 * [`plugins/zsh-smart-insert.md`](./project-docs/plugins/zsh-smart-insert.md)
 * [`plugins/zsh-ai-complete.md`](./project-docs/plugins/zsh-ai-complete.md)
+* [`ssh-agent-setup.md`](./project-docs/ssh-agent-setup.md) 🚨 **Required to enable Git and SSH operations inside containers**
 
 ## 🚀 Author
 
