@@ -7,16 +7,17 @@ It follows a narrative format inspired by the actual PRs used in this project, w
 ### ✍️ What was done
 
 <!--
-Briefly describe the change in this PR. Prefer starting with "This PR introduces:" followed by bullet points.
-Mention new files, structural changes, or improvements.
+Start with a short paragraph explaining the purpose and scope of the PR.
+Then, list the key changes using bullet points.
 Example:
 
-This PR introduces:
-- New guide: `project-docs/ssh-agent-setup.md`
-- README link referencing the setup as required
+This PR introduces documentation for properly setting up an SSH agent on the **host machine** to ensure Git and SSH operations work correctly inside the DevContainers.
+
+- Added `project-docs/ssh-agent-setup.md` with a complete, copy-pasteable setup guide
+- Updated `README.md` to reference this document and highlight that this step is required
 -->
 
-This PR introduces:
+This PR introduces...
 
 * ...
 * ...
@@ -31,7 +32,6 @@ Example:
 Without this change, ...
 
 This improvement ensures that ... and helps prevent ...
-
 -->
 
 Without this change, ...
